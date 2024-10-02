@@ -1,9 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:new_app/auth/registration.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:new_app/auth/registration.dart';
+import 'package:new_app/firebase_options.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  ); // Ensure this is called before runApp()
   runApp(const ColonyForumApp());
+}
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // Handle background message here
+  print('Handling a background message: ${message.messageId}');
 }
 
 class ColonyForumApp extends StatelessWidget {
@@ -11,37 +22,10 @@ class ColonyForumApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: Firebase.initializeApp(),
-      builder: (context, snapshot) {
-        // Show a loading spinner while Firebase initializes
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const MaterialApp(
-            home: Scaffold(
-              body: Center(child: CircularProgressIndicator()),
-            ),
-          );
-        }
-
-        // If there's an error during initialization
-        if (snapshot.hasError) {
-          return const MaterialApp(
-            home: Scaffold(
-              body: Center(child: Text('Error initializing Firebase')),
-            ),
-          );
-        }
-
-        // Firebase is initialized, show the main app
-        return MaterialApp(
-          debugShowCheckedModeBanner: false,
-          title: 'Colony Forum',
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-          ),
-          home: RegistrationPage(),
-        );
-      },
+    return MaterialApp(
+      title: 'Colony Forum',
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: RegistrationPage(),
     );
   }
 }
